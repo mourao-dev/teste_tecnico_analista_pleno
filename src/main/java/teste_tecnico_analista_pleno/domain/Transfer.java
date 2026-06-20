@@ -1,7 +1,7 @@
 package teste_tecnico_analista_pleno.domain;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -27,7 +27,7 @@ public class Transfer {
     private String destinationAccount;
     private BigDecimal amount;
     private BigDecimal fee;
-    private LocalDateTime transferDate;
-    private LocalDateTime appointmentDate;
+    private LocalDate transferDate;
+    private LocalDate appointmentDate;
 
 }
