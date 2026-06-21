@@ -2,7 +2,6 @@ package teste_tecnico_analista_pleno.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -16,5 +15,5 @@ public class TransferResponseDto {
     private BigDecimal amount;
     private BigDecimal fee;
     private LocalDate transferDate;
-    private LocalDateTime appointmentDate;
+    private LocalDate appointmentDate;
 }
