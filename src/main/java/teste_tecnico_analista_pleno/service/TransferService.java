@@ -11,46 +11,38 @@ import teste_tecnico_analista_pleno.domain.Transfer;
 import teste_tecnico_analista_pleno.dto.TransferRequestDto;
 import teste_tecnico_analista_pleno.dto.TransferResponseDto;
 import teste_tecnico_analista_pleno.handler.exceptions.FeeNotApplicableException;
+import teste_tecnico_analista_pleno.mapper.TransferMapper;
 import teste_tecnico_analista_pleno.repository.TransferRepository;
 
 @Service
 public class TransferService implements TransferServiceInterface {
        private final TransferRepository repository;
+       private final TransferMapper mapper;
 
-    public TransferService(TransferRepository repository) {
-        this.repository = repository;
-    }
+   public TransferService(TransferRepository repository, TransferMapper mapper) {
+    this.repository = repository;
+    this.mapper = mapper;
+}
 
-    @Override
-    public TransferResponseDto create(TransferRequestDto request) {
+   @Override
+public TransferResponseDto create(TransferRequestDto request) {
 
-        Transfer transfer = new Transfer();
+    validateAccount(request.getOriginAccount());
+    validateAccount(request.getDestinationAccount());
 
-        transfer.setOriginAccount(request.getOriginAccount());
-        transfer.setDestinationAccount(request.getDestinationAccount());
-        transfer.setAmount(request.getAmount());
-        transfer.setTransferDate(request.getTransferDate());
-        transfer.setAppointmentDate(LocalDate.now());
-        BigDecimal fee = calculateFee(transfer);
-        transfer.setFee(fee);
+    Transfer transfer = new Transfer();
 
-        repository.save(transfer);
+    transfer.setOriginAccount(request.getOriginAccount());
+    transfer.setDestinationAccount(request.getDestinationAccount());
+    transfer.setAmount(request.getAmount());
+    transfer.setTransferDate(request.getTransferDate());
+    transfer.setAppointmentDate(LocalDate.now());
 
-        return new TransferResponseDto();
-    }
+    transfer.setFee(calculateFee(transfer));
 
-    private TransferResponseDto toResponse(Transfer transfer) {
+    Transfer saved = repository.save(transfer);
 
-    TransferResponseDto dto = new TransferResponseDto();
-
-    dto.setId(transfer.getId());
-    dto.setOriginAccount(transfer.getOriginAccount());
-    dto.setDestinationAccount(transfer.getDestinationAccount());
-    dto.setAmount(transfer.getAmount());
-    dto.setFee(transfer.getFee());
-    dto.setTransferDate(transfer.getTransferDate());
-
-    return dto;
+    return mapper.toResponse(saved);
 }
 
    @Override
@@ -58,7 +50,7 @@ public List<TransferResponseDto> getByAccount(String account) {
 
     return repository.findByOriginAccount(account)
             .stream()
-            .map(this::toResponse)
+            .map(mapper::toResponse)
             .toList();
 }
 
@@ -73,26 +65,31 @@ public BigDecimal calculateFee(Transfer transfer) {
         throw new FeeNotApplicableException("Transfer not allowed. Fee not applicable");
     }
 
+    BigDecimal fee;
+
     if (days == 0) {
-        return new BigDecimal("0.025");
+        fee = new BigDecimal("0.025");
+    } else if (days <= 10) {
+        fee = BigDecimal.ZERO;
+    } else if (days <= 20) {
+        fee = new BigDecimal("0.082");
+    } else if (days <= 30) {
+        fee = new BigDecimal("0.069");
+    } else if (days <= 40) {
+        fee = new BigDecimal("0.047");
+    } else {
+        fee = new BigDecimal("0.017");
     }
 
-    if (days >= 1 && days <= 10) {
-        return BigDecimal.ZERO;
-    }
+    return transfer.getAmount().multiply(fee);
+}
 
-    if (days >= 11 && days <= 20) {
-        return new BigDecimal("0.082");
-    }
+private void validateAccount(String account) {
 
-    if (days >= 21 && days <= 30) {
-        return new BigDecimal("0.069");
+    if (account == null || account.length() != 10) {
+        throw new IllegalArgumentException(
+            "A conta deve possuir 10 caracteres"
+        );
     }
-
-    if (days >= 31 && days <= 40) {
-        return new BigDecimal("0.047");
-    }
-
-    return new BigDecimal("0.017");
 }
 }
