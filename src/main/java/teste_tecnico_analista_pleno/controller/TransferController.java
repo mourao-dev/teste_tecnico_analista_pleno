@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
-
 @RestController
 @RequestMapping("/transfers")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -39,10 +37,10 @@ public class TransferController {
                 .body(service.create(request));
     }
 
-@GetMapping("/{account}")
+    @GetMapping("/{account}")
     public ResponseEntity<List<TransferResponseDto>> getByAccount(
-        @PathVariable String account) {
+            @PathVariable String account) {
 
-    return ResponseEntity.ok(service.getByAccount(account));
-}
+        return ResponseEntity.ok(service.getByAccount(account));
+    }
 }

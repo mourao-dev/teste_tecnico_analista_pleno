@@ -9,6 +9,8 @@ import teste_tecnico_analista_pleno.dto.TransferResponseDto;
 
 public interface TransferServiceInterface {
   TransferResponseDto create(TransferRequestDto request);
+
   List<TransferResponseDto> getByAccount(String account);
- BigDecimal calculateFee(Transfer transfer);
+
+  BigDecimal calculateFee(Transfer transfer);
 }
