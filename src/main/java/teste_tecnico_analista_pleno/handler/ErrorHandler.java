@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import teste_tecnico_analista_pleno.handler.exceptions.AccountNotFound;
 import teste_tecnico_analista_pleno.handler.exceptions.FeeNotApplicableException;
 
 @RestControllerAdvice
@@ -23,6 +24,7 @@ public class ErrorHandler {
                 .body(error);
     }
 
+@ExceptionHandler(FeeNotApplicableException.class)
     public ResponseEntity<ErrorResponse> handleFeeNotApplicable(
         FeeNotApplicableException ex) {
 
@@ -31,6 +33,17 @@ public class ErrorHandler {
             .body(new ErrorResponse(
                     ex.getMessage(),
                     HttpStatus.UNPROCESSABLE_ENTITY.value()
+            ));
+            
+}
+@ExceptionHandler(AccountNotFound.class)
+public ResponseEntity<ErrorResponse> handleAccountNotFound(
+        AccountNotFound ex) {
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(new ErrorResponse(
+                    ex.getMessage(),
+                    HttpStatus.NOT_FOUND.value()
             ));
 }
 }

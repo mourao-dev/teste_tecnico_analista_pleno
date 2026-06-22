@@ -11,14 +11,16 @@ import org.springframework.stereotype.Service;
 import teste_tecnico_analista_pleno.domain.Transfer;
 import teste_tecnico_analista_pleno.dto.TransferRequestDto;
 import teste_tecnico_analista_pleno.dto.TransferResponseDto;
-import teste_tecnico_analista_pleno.handler.exceptions.FeeNotApplicableException;
+import teste_tecnico_analista_pleno.handler.exceptions.AccountNotFound;
 import teste_tecnico_analista_pleno.mapper.TransferMapper;
 import teste_tecnico_analista_pleno.repository.TransferRepository;
+import teste_tecnico_analista_pleno.service.fee.FeeCalculator;
 
 @Service
 public class TransferService implements TransferServiceInterface {
     private final TransferRepository repository;
     private final TransferMapper mapper;
+    private final FeeCalculator feeCalculator = new FeeCalculator();
 
     public TransferService(TransferRepository repository, TransferMapper mapper) {
         this.repository = repository;
@@ -46,42 +48,27 @@ public class TransferService implements TransferServiceInterface {
         return mapper.toResponse(saved);
     }
 
-    @Override
-    public List<TransferResponseDto> getByAccount(String account) {
+   @Override
+public List<TransferResponseDto> getByAccount(String account) {
 
-    return repository.findByOriginAccount(account)
-            .stream()
+    List<Transfer> transfers = repository.findByOriginAccount(account);
+
+if (transfers.isEmpty()) {
+    throw new AccountNotFound(
+        "Nenhuma transferência encontrada para a conta " + account);
+}
+
+    return transfers.stream()
             .map(mapper::toResponse)
             .collect(Collectors.toList());
 }
 
     public BigDecimal calculateFee(Transfer transfer) {
-
         long days = ChronoUnit.DAYS.between(
                 transfer.getAppointmentDate(),
                 transfer.getTransferDate());
 
-        if (days < 0 || days > 50) {
-            throw new FeeNotApplicableException("Transfer not allowed. Fee not applicable");
-        }
-
-        BigDecimal fee;
-
-        if (days == 0) {
-            fee = new BigDecimal("0.025");
-        } else if (days <= 10) {
-            fee = BigDecimal.ZERO;
-        } else if (days <= 20) {
-            fee = new BigDecimal("0.082");
-        } else if (days <= 30) {
-            fee = new BigDecimal("0.069");
-        } else if (days <= 40) {
-            fee = new BigDecimal("0.047");
-        } else {
-            fee = new BigDecimal("0.017");
-        }
-
-        return transfer.getAmount().multiply(fee);
+        return feeCalculator.calculate(days, transfer.getAmount());
     }
 
     private void validateAccount(String account) {
