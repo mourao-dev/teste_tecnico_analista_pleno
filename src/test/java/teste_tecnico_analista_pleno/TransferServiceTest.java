@@ -168,6 +168,14 @@ class TransferServiceTest {
                 () -> service.calculateFee(t));
     }
 
+    @Test
+    void shouldThrowExceptionWhenAmountNegative() {
+        Transfer t = buildTransfer(10, new BigDecimal("-100.00"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.calculateFee(t));
+    }
+
     private Transfer buildTransfer(int days, BigDecimal amount) {
         Transfer t = new Transfer();
         t.setAmount(amount);

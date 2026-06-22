@@ -65,6 +65,7 @@ if (transfers.isEmpty()) {
 }
 
 public BigDecimal calculateFee(Transfer transfer) {
+       validateAmount(transfer.getAmount());
 
 long days = ChronoUnit.DAYS.between(
         LocalDate.now(),
