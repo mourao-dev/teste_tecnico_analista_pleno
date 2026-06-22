@@ -32,6 +32,7 @@ public class TransferService implements TransferServiceInterface {
 
         validateAccount(request.getOriginAccount());
         validateAccount(request.getDestinationAccount());
+        validateAmount(request.getAmount());
 
         Transfer transfer = new Transfer();
 
@@ -80,4 +81,10 @@ long days = ChronoUnit.DAYS.between(
                     "A conta deve possuir 10 caracteres");
         }
     }
+
+    private void validateAmount(BigDecimal amount) {
+    if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+        throw new IllegalArgumentException("O valor da transferência deve ser maior que zero");
+    }
+}
 }
