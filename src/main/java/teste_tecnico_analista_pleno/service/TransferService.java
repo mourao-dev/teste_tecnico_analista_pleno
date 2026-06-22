@@ -63,13 +63,15 @@ if (transfers.isEmpty()) {
             .collect(Collectors.toList());
 }
 
-    public BigDecimal calculateFee(Transfer transfer) {
-        long days = ChronoUnit.DAYS.between(
-                transfer.getAppointmentDate(),
-                transfer.getTransferDate());
+public BigDecimal calculateFee(Transfer transfer) {
 
-        return feeCalculator.calculate(days, transfer.getAmount());
-    }
+long days = ChronoUnit.DAYS.between(
+        LocalDate.now(),
+        transfer.getTransferDate()
+);
+
+    return feeCalculator.calculate(days, transfer.getAmount());
+}
 
     private void validateAccount(String account) {
 
